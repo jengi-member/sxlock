@@ -170,7 +170,6 @@ main_loop(Window w, GC gc, XftDraw* xftdraw, XftFont* font, WindowPositionInfo* 
 
     unsigned int len = 0;
     Bool running = True;
-    Bool sleepmode = False;
     Bool failed = False;
 
     XSync(dpy, False);
@@ -193,8 +192,6 @@ main_loop(Window w, GC gc, XftDraw* xftdraw, XftFont* font, WindowPositionInfo* 
 
     /* main event loop */
     while(running && !XNextEvent(dpy, &event)) {
-        if (sleepmode && using_dpms)
-            DPMSForceLevel(dpy, DPMSModeOff);
 
         /* update window if no events pending */
         if (!XPending(dpy)) {
@@ -225,13 +222,10 @@ main_loop(Window w, GC gc, XftDraw* xftdraw, XftFont* font, WindowPositionInfo* 
             }
         }
 
-        if (event.type == MotionNotify) {
-            sleepmode = False;
+        if (event.type == MotionNotify)
             failed = False;
-        }
 
         if (event.type == KeyPress) {
-            sleepmode = False;
             failed = False;
 
             char inputChar = 0;
@@ -256,7 +250,6 @@ main_loop(Window w, GC gc, XftDraw* xftdraw, XftFont* font, WindowPositionInfo* 
                     break;
                 case XK_Escape:
                     len = 0;
-                    sleepmode = True;
                     break;
                 case XK_BackSpace:
                     if (len)
